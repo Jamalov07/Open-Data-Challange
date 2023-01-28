@@ -256,6 +256,9 @@ export class UserService {
     const user = await this.userRepo.findOne({
       where: { user_id: `${ctx.from.id}` },
     });
+    const driver = await this.driverRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
     if (user) {
       if ('text' in ctx.message) {
         if (user.last_state === 'real_name') {
@@ -564,6 +567,114 @@ export class UserService {
                 },
               );
             }
+          }
+        } else if (user.last_state === 'car_number') {
+          await this.driverRepo.update(
+            {
+              car_number: `${ctx.message.text}`,
+            },
+            {
+              where: {
+                user_id: `${ctx.from.id}`,
+              },
+            },
+          );
+          await this.userRepo.update(
+            {
+              last_state: 'tex-passport',
+            },
+            {
+              where: {
+                user_id: `${ctx.from.id}`,
+              },
+            },
+          );
+          if (user.user_lang == 'UZB') {
+            await ctx.replyWithHTML(
+              'Mashinaning tex-passporti raqamini kiriting !',
+            );
+          } else {
+            await ctx.replyWithHTML(
+              'Введите номер технического паспорта автомобиля !',
+            );
+          }
+        } else if (user.last_state === 'tex-passport') {
+          let data;
+          try {
+            data = await (
+              await axios.get(
+                `https://api-dtp.yhxbb.uz/api/egov/open_data/info_car?format=json&plate_number=${driver.car_number}&tech_pass=${ctx.message.text}`,
+              )
+            ).data;
+          } catch (error) {
+            if (user.user_lang == 'UZB') {
+              await ctx.reply(
+                'Texnik ruxsatnomangiz yoki mashina raqamingiz xato',
+              );
+            } else {
+              await ctx.reply(
+                'Ваше техническое разрешение или номер транспортного средства неверны',
+              );
+            }
+          }
+          if (data) {
+            await this.driverRepo.update(
+              {
+                last_state: 'non-active',
+                car_model: `${data.pModel}`,
+                car_color: `${data.pVehicleColor}`,
+                car_year: `${data.pYear}`,
+              },
+              {
+                where: {
+                  user_id: `${ctx.from.id}`,
+                },
+              },
+            );
+            await this.userRepo.update(
+              {
+                last_state: 'non-active',
+              },
+              {
+                where: {
+                  user_id: `${ctx.from.id}`,
+                },
+              },
+            );
+          } else {
+            console.log('error');
+          }
+          const newDriver = await this.driverRepo.findOne({
+            where: {
+              user_id: `${ctx.from.id}`,
+            },
+          });
+          await user.update({ last_state: 'finish' });
+          await ctx.telegram.sendMessage(
+            +process.env.ADMIN_ID,
+            `${newDriver.first_name}\n ${newDriver.last_name}\n ${newDriver.car_model}\n ${newDriver.car_number}\n ${newDriver.car_year}\n ${newDriver.user_id}`,
+            {
+              parse_mode: 'HTML',
+              ...Markup.inlineKeyboard([
+                Markup.button.callback(
+                  '✅ Tasdiqlayman',
+                  `verify=${ctx.from.id}`,
+                ),
+                Markup.button.callback(
+                  '❌ Rad qilinsin',
+                  `otmen=${ctx.from.id}`,
+                ),
+              ]),
+            },
+          );
+          if (user.user_lang == 'UZB') {
+            await ctx.replyWithHTML(
+              "Ma'lumotlaringiz <b>admin</b> ga yetkazildi. Admin ruxsat berishi bilan sizga activelik taqdim qilinadi",
+            );
+          } else {
+            await ctx.replyWithHTML(
+              'Ваша информация была отправлена <b>admin</b>. Активность будет предоставлена вам, как только администратор одобрит ее.',
+            );
           }
         }
       }
@@ -1392,7 +1503,6 @@ export class UserService {
       await ctx.reply('/start');
     }
   }
-
   //=======================
 
   async delivery(ctx: Context, lang: string) {
@@ -1732,6 +1842,7 @@ export class UserService {
       const driverUser = await this.userRepo.findOne({
         where: { user_id: String(ctx.from.id) },
       });
+      await driverUser.update({last_state:"driver"})
       let strPassenger = [];
       let strDriver = [];
       const taxi = await this.taxiRepo.findOne({
@@ -2146,6 +2257,246 @@ export class UserService {
       }
     } catch (error) {
       console.log('salom');
+    }
+  }
+
+  //====================
+
+  async onDriver(ctx: Context) {
+    const driver = await this.driverRepo.findOne({
+      where: {
+        user_id: `${ctx.from.id}`,
+      },
+    });
+    const user = await this.userRepo.findOne({
+      where: {
+        user_id: `${ctx.from.id}`,
+      },
+    });
+    if (driver) {
+      if (user.user_lang == 'UZB') {
+        return this.workStatusTrue(ctx, 'UZB');
+      } else {
+        return this.workStatusFalse(ctx, 'RUS');
+      }
+    } else if (!user) {
+      await ctx.replyWithHTML(
+        '<b>Lady Taxi xizmatining haydovchi rejimiga xush kelibsiz</b>',
+      );
+      await ctx.replyWithHTML(
+        "Haydovchi rejimiga o'tish uchun avval Mijoz rejimiga o'tib profilning Ism va Telefon ma'lumotlarini to'liq kiriting.",
+      );
+    } else {
+      await this.driverRepo.create({
+        user_id: `${user.user_id}`,
+        first_name: `${user.first_name}`,
+        last_name: `${user.last_name}`,
+        username: `${user.username}`,
+        user_lang: `${user.user_lang}`,
+        phone_number: `${user.phone_number}`,
+      });
+      if (user.user_lang == 'UZB') {
+        await ctx.reply(
+          'Lady Taxi xizmatining haydovchi rejimiga xush kelibsiz !',
+        );
+        await ctx.reply(
+          "Lady Taxi xizmatida haydovchi sifatida ro'yxatdan o'tish uchun «Ro'yxatdan o'tish» tugmasini bosing.",
+          {
+            parse_mode: 'HTML',
+            ...Markup.keyboard(["👩🏼‍💻 Ro'yxatdan o'tish"]).oneTime().resize(),
+          },
+        );
+      } else {
+        await ctx.reply('Добро пожаловать в режим Таксист!');
+        await ctx.reply(
+          'Чтобы зарегистрироваться в качестве водителя в сервисе Lady Taxi, нажмите кнопку «Зарегистрироваться».',
+          {
+            parse_mode: 'HTML',
+            ...Markup.keyboard(['👩🏼‍💻 Зарегистрироваться']).oneTime().resize(),
+          },
+        );
+      }
+    }
+  }
+
+  async registrationDriver(ctx: Context, lang: String) {
+    await this.userRepo.update(
+      {
+        last_state: 'car_number',
+      },
+      {
+        where: {
+          user_id: `${ctx.from.id}`,
+        },
+      },
+    );
+
+    if (lang == 'UZB') {
+      await ctx.reply('Avtomobil raqamini kiriting', {
+        parse_mode: 'HTML',
+      });
+    } else {
+      await ctx.reply('Введите номер автомобиля', {
+        parse_mode: 'HTML',
+      });
+    }
+  }
+
+  async verifyDriver(ctx: Context) {
+    let index;
+    if ('match' in ctx) {
+      const message = ctx.match[0];
+      index = message.split('=')[1];
+    }
+    const idUser = await this.userRepo.findOne({
+      where: {
+        user_id: `${index}`,
+      },
+    });
+    console.log(index);
+    console.log(idUser);
+    if (idUser.user_lang == 'UZB') {
+      await ctx.telegram.sendMessage(
+        `${index}`,
+        'Admin sizga ruxsat berdi. Statusingizni tekshirib oling !',
+        {
+          parse_mode: 'HTML',
+          ...Markup.inlineKeyboard([
+            Markup.button.callback(
+              '☑️ Statusni tekshirish',
+              'checkDriverStatus',
+            ),
+          ]),
+        },
+      );
+    } else {
+      await ctx.telegram.sendMessage(
+        `${index}`,
+        'Админ дал вам разрешение. Проверьте свой статус !',
+        {
+          parse_mode: 'HTML',
+          ...Markup.inlineKeyboard([
+            Markup.button.callback('☑️ Проверь состояние', 'checkDriverStatus'),
+          ]),
+        },
+      );
+    }
+  }
+
+  async notAccesDriver(ctx: Context) {
+    let index;
+    if ('match' in ctx) {
+      const message = ctx.match[0];
+      index = message.split('=')[1];
+    }
+    const idUser = await this.userRepo.findOne({
+      where: {
+        user_id: `${index}`,
+      },
+    });
+    if (idUser.user_lang == 'UZB') {
+      await ctx.telegram.sendMessage(
+        `${index}`,
+        "Afsuski admin sizga ruxsat bermadi, Ma'lum muddatdan so'ng qayta urinib ko'ring ! ",
+      );
+    } else {
+      await ctx.telegram.sendMessage(
+        `${index}`,
+        'К сожалению, админ не разрешил, попробуйте еще раз через определенный промежуток времени!',
+      );
+    }
+  }
+
+  async checkDriverStatus(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: {
+        user_id: `${ctx.from.id}`,
+      },
+    });
+    if (user.user_lang == 'UZB') {
+      await ctx.reply(
+        "Tabriklaymiz ! Siz <b>Lady Taxy</b> haydovchilari safiga qo'shildingiz !\n Hozirdan ishni boshlashingiz mumkin !",
+        {
+          parse_mode: 'HTML',
+          ...Markup.keyboard([
+            '🚕 Hozirdan ishlayman !',
+            '🛋 Hozircha dam olaman',
+          ])
+            .oneTime()
+            .resize(),
+        },
+      );
+    } else {
+      await ctx.reply(
+        'Поздравляем! Вы пополнили ряды водителей <b>Lady Taxi</b>!\n Вы можете начать работать прямо сейчас!',
+        {
+          parse_mode: 'HTML',
+          ...Markup.keyboard(['🚕 Я сейчас работаю !', '🛋 Я пока отдохну'])
+            .oneTime()
+            .resize(),
+        },
+      );
+    }
+  }
+
+  async workStatusTrue(ctx: Context, lang: String) {
+    await this.driverRepo.update(
+      {
+        last_state: 'ReadyToWork',
+        work_status: true,
+      },
+      {
+        where: {
+          user_id: `${ctx.from.id}`,
+        },
+      },
+    );
+    if (lang == 'UZB') {
+      await ctx.reply('🚖 Kuting, mijozlar chiqishi bilan sizga sms yozasiz', {
+        parse_mode: 'HTML',
+        ...Markup.keyboard([["⛔️ Ishni to'xtatish"]])
+          .oneTime()
+          .resize(),
+      });
+    } else {
+      await ctx.reply(
+        '🚖 Подождите, как только клиенты уйдут, вам придет СМС',
+        {
+          parse_mode: 'HTML',
+          ...Markup.keyboard([['⛔️ Остановить работу']])
+            .oneTime()
+            .resize(),
+        },
+      );
+    }
+  }
+
+  async workStatusFalse(ctx: Context, lang: String) {
+    await this.driverRepo.update(
+      {
+        last_state: 'offWork',
+        work_status: false,
+      },
+      {
+        where: {
+          user_id: `${ctx.from.id}`,
+        },
+      },
+    );
+    if (lang == 'UZB') {
+      await ctx.reply('🚖 Tezroq ishga qayting !', {
+        parse_mode: 'HTML',
+        ...Markup.keyboard([['🚕 Hozirdan ishlayman !']])
+          .oneTime()
+          .resize(),
+      });
+    } else {
+      await ctx.reply('🚖 Скорей вернись к работе!', {
+        parse_mode: 'HTML',
+        ...Markup.keyboard([['🚕 Я сейчас работаю !']])
+          .oneTime()
+          .resize(),
+      });
     }
   }
 }

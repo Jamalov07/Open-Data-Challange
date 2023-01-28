@@ -1,4 +1,4 @@
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
 interface DriverAttrs {
   user_id: string;
@@ -12,12 +12,14 @@ interface DriverAttrs {
   car_color: string;
   car_photo: string;
   work_status: boolean;
+  user_lang: string;
   last_lat: string;
   last_lon: string;
   last_state: string;
+  car_year: string;
 }
 
-@Table({ tableName: "driver" })
+@Table({ tableName: 'driver' })
 export class Driver extends Model<Driver, DriverAttrs> {
   @Column({
     type: DataType.INTEGER,
@@ -54,5 +56,9 @@ export class Driver extends Model<Driver, DriverAttrs> {
   @Column({ type: DataType.STRING })
   last_lon: string;
   @Column({ type: DataType.STRING })
+  user_lang: string;
+  @Column({ type: DataType.STRING })
   last_state: string;
+  @Column({ type: DataType.STRING })
+  car_year: string;
 }

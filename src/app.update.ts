@@ -1,4 +1,12 @@
-import { Action, Ctx, Hears, On, Start, Update } from 'nestjs-telegraf';
+import {
+  Action,
+  Command,
+  Ctx,
+  Hears,
+  On,
+  Start,
+  Update,
+} from 'nestjs-telegraf';
 import { Context } from 'telegraf';
 import { DriverService } from './driver.service';
 import { MessageService } from './message.service';
@@ -198,9 +206,69 @@ export class AppUpdate {
     return await this.userService.marking(ctx);
   }
 
+  @Command('driver')
+  async onDriver(@Ctx() ctx: Context) {
+    return this.userService.onDriver(ctx);
+  }
+
   @On('location')
   async onLocation(@Ctx() ctx: Context) {
     await this.userService.onLocation(ctx);
+  }
+//==============
+
+  @Hears("👩🏼‍💻 Ro'yxatdan o'tish")
+  async registrationDriver(@Ctx() ctx:Context) {
+    return this.userService.registrationDriver(ctx,'UZB');
+  }
+
+  @Hears("👩🏼‍💻 Зарегистрироваться")
+  async registrationDriverRu(@Ctx() ctx:Context) {
+    return this.userService.registrationDriver(ctx,'RUS');
+  }
+
+  @Hears('🚕 Hozirdan ishlayman !')
+  async workStatusTrue(@Ctx() ctx:Context) {
+    return this.userService.workStatusTrue(ctx,'UZB');
+  }
+  @Hears('🛋 Hozircha dam olaman')
+  async workStatusFalse(@Ctx() ctx:Context) {
+    return this.userService.workStatusFalse(ctx,'UZB');
+  }
+
+  @Hears('🚕 Я сейчас работаю !')
+  async workStatusTrueRU(@Ctx() ctx:Context) {
+    return this.userService.workStatusTrue(ctx,'RUS');
+  }
+
+  @Hears('🛋 Я пока отдохну')
+  async workStatusFalseRU(@Ctx() ctx:Context) {
+    return this.userService.workStatusFalse(ctx,'RUS');
+  }
+
+  @Hears("⛔️ Ishni to'xtatish")
+  async stopWorking(@Ctx() ctx:Context) {
+    return this.userService.workStatusFalse(ctx,'UZB');
+  }
+
+  @Hears('⛔️ Остановить работу')
+  async stopWorkingRU(@Ctx() ctx:Context) {
+    return this.userService.workStatusFalse(ctx,'RUS');
+  }
+
+  @Action(/^(verify=\d+)/)
+  async verifyDriver(@Ctx() ctx:Context) {
+    return this.userService.verifyDriver(ctx);
+  }
+
+  @Action(/^(otmen=\d+)/)
+  async notAccessDriver(@Ctx() ctx:Context) {
+    return this.userService.notAccesDriver(ctx);
+  }
+
+  @Action('checkDriverStatus')
+  async checkDriverStatus(@Ctx() ctx: Context) {
+    return this.userService.checkDriverStatus(ctx)
   }
 
   @On('message')

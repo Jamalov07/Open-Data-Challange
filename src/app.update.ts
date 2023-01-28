@@ -57,6 +57,13 @@ export class AppUpdate {
     await this.userService.hearsProfil(ctx);
   }
 
+  @Action("replacename")
+  async replaceName(@Ctx() ctx: Context) {
+    await this.userService.replaceName(ctx);
+  }
+
+  
+
   @On('message')
   async onMessage(@Ctx() ctx: Context) {
     await this.userService.onMessage(ctx);

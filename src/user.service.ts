@@ -315,7 +315,27 @@ export class UserService {
             real_name: ctx.message.text,
             last_state: 'finish',
           });
-          
+          if (user.user_lang == 'UZB') {
+            await ctx.reply(`Ismingiz ${user.real_name}ga o'zgartirildi`, {
+              parse_mode: 'HTML',
+              ...Markup.keyboard([
+                ['🚖 Taksi chaqirish 🙋‍♀️', '🚚 Yetkazib berish 🙋‍♀️'],
+                ['🙎🏼‍♀️ Profil', '🏠 Doimiy manzillar'],
+              ])
+                .oneTime()
+                .resize(),
+            });
+          } else {
+            await ctx.reply(`Ваше имя изменено на ${user.real_name}`, {
+              parse_mode: 'HTML',
+              ...Markup.keyboard([
+                ['🚖 Вызвать такси 🙋‍♀️', '🚚 Доставка 🙋‍♀️'],
+                ['🙎🏼‍ профиль', '🏠 Постоянные адреса'],
+              ])
+                .oneTime()
+                .resize(),
+            });
+          }
         }
       }
     } else {
@@ -447,6 +467,31 @@ export class UserService {
           parse_mode: 'HTML',
           ...uzKeyboards.cancel_replace_name,
         });
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
+  async replacePhoneNumber(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      if (user.last_state === 'finish') {
+        await user.update({ last_state: 'change_phone' });
+
+        if (user.user_lang == 'UZB') {
+          await ctx.reply(`Yangi telefon raqam kiriting`, {
+            parse_mode: 'HTML',
+            ...uzKeyboards.cancel_replace_phone,
+          });
+        } else if (user.user_lang === 'RUS') {
+          await ctx.reply('Введите новый номер телефона', {
+            parse_mode: 'HTML',
+            ...ruKeyboards.cancel_replace_phone,
+          });
+        }
       }
     } else {
       await ctx.reply('/start');

@@ -1365,15 +1365,15 @@ export class UserService {
       where: { user_id: `${ctx.from.id}` },
     });
     if (user) {
-      if (user.last_state === 'finish') {
-        await user.update({ last_state: 'change_lang' });
-        await ctx.reply('Tilni tanlang | Выберите язык', {
-          parse_mode: 'HTML',
-          ...Markup.keyboard([["🇺🇿 O'zbek tili"], ['🇷🇺 Русский язык']])
-            .oneTime()
-            .resize(),
-        });
-      }
+      // if (user.last_state === 'finish') {
+      await user.update({ last_state: 'change_lang' });
+      await ctx.reply('Tilni tanlang | Выберите язык', {
+        parse_mode: 'HTML',
+        ...Markup.keyboard([["🇺🇿 O'zbek tili"], ['🇷🇺 Русский язык']])
+          .oneTime()
+          .resize(),
+      });
+      // }
     } else {
       await ctx.reply('/start');
     }
@@ -1404,7 +1404,10 @@ export class UserService {
                   ),
                   {
                     parse_mode: 'HTML',
-                    ...uzKeyboards.in_this_direction(i, a),
+                    ...uzKeyboards.in_this_direction(
+                      userAddresses[i].id,
+                      userAddresses[a].id,
+                    ),
                   },
                 );
               } else if (user.user_lang === 'RUS') {
@@ -1415,7 +1418,10 @@ export class UserService {
                   ),
                   {
                     parse_mode: 'HTML',
-                    ...ruKeyboards.in_this_direction(i, a),
+                    ...ruKeyboards.in_this_direction(
+                      userAddresses[i].id,
+                      userAddresses[a].id,
+                    ),
                   },
                 );
               }
@@ -1431,7 +1437,10 @@ export class UserService {
                   ),
                   {
                     parse_mode: 'HTML',
-                    ...uzKeyboards.in_this_direction(i, a),
+                    ...uzKeyboards.in_this_direction(
+                      userAddresses[i].id,
+                      userAddresses[a].id,
+                    ),
                   },
                 );
               } else if (user.user_lang === 'RUS') {
@@ -1442,7 +1451,10 @@ export class UserService {
                   ),
                   {
                     parse_mode: 'HTML',
-                    ...ruKeyboards.in_this_direction(i, a),
+                    ...ruKeyboards.in_this_direction(
+                      userAddresses[i].id,
+                      userAddresses[a].id,
+                    ),
                   },
                 );
               }
@@ -1470,35 +1482,35 @@ export class UserService {
       where: { user_id: `${ctx.from.id}` },
     });
     if (user) {
-      if (user.last_state === 'finish') {
-        await user.update({ last_state: 'taxi' }); //==============
-        await this.taxiRepo.create({
-          user_id: user.user_id,
-          taxi_call_type: 'taxi',
-          taxi_state: 'from_location',
-        });
+      // if (user.last_state === 'finish') {
+      await user.update({ last_state: 'taxi' }); //==============
+      await this.taxiRepo.create({
+        user_id: user.user_id,
+        taxi_call_type: 'taxi',
+        taxi_state: 'from_location',
+      });
 
-        if (user.user_lang === 'UZB') {
-          await ctx.reply(uzReplyMessages.call_taxi.about);
-          await ctx.reply(uzReplyMessages.call_taxi.methods, {
-            parse_mode: 'HTML',
-            ...Markup.keyboard([
-              [
-                Markup.button.locationRequest('📍 Manzilni yuborish'),
-                '🙅‍♀️ Bekor qilish',
-              ],
-            ])
-              .oneTime()
-              .resize(),
-          });
-        } else if (user.user_lang === 'RUS') {
-          await ctx.reply(ruReplyMessages.call_taxi.about);
-          await ctx.reply(ruReplyMessages.call_taxi.methods, {
-            parse_mode: 'HTML',
-            ...ruKeyboards.req_location,
-          });
-        }
+      if (user.user_lang === 'UZB') {
+        await ctx.reply(uzReplyMessages.call_taxi.about);
+        await ctx.reply(uzReplyMessages.call_taxi.methods, {
+          parse_mode: 'HTML',
+          ...Markup.keyboard([
+            [
+              Markup.button.locationRequest('📍 Manzilni yuborish'),
+              '🙅‍♀️ Bekor qilish',
+            ],
+          ])
+            .oneTime()
+            .resize(),
+        });
+      } else if (user.user_lang === 'RUS') {
+        await ctx.reply(ruReplyMessages.call_taxi.about);
+        await ctx.reply(ruReplyMessages.call_taxi.methods, {
+          parse_mode: 'HTML',
+          ...ruKeyboards.req_location,
+        });
       }
+      // }
     } else {
       await ctx.reply('/start');
     }
@@ -1842,7 +1854,7 @@ export class UserService {
       const driverUser = await this.userRepo.findOne({
         where: { user_id: String(ctx.from.id) },
       });
-      await driverUser.update({last_state:"driver"})
+      await driverUser.update({ last_state: 'driver' });
       let strPassenger = [];
       let strDriver = [];
       const taxi = await this.taxiRepo.findOne({
@@ -2150,6 +2162,7 @@ export class UserService {
       });
 
       if (taxi.taxi_state == 'start_taxi_action') {
+        await taxi.update({ taxi_start_time: new Date() });
         if (driver.user_lang == 'UZB') {
           strDriver = [
             "Quyidagi lokatsiyaga borish kerak 👇🏽. Yetib borganingizda 'Yetib bordik' knopkasini bosing",
@@ -2197,6 +2210,9 @@ export class UserService {
       });
 
       if (taxi.taxi_state == 'finish_location') {
+        await taxi.update({ taxi_end_time: new Date() });
+        await user.update({ last_state: 'finish' });
+        await driver.update({ last_state: 'finish' });
         if (driver.user_lang === 'UZB') {
           strDriver = [
             "Salomat bo'ling. Biz tez orada sizga yangi yo'lovchi topamiz",
@@ -2497,6 +2513,320 @@ export class UserService {
           .oneTime()
           .resize(),
       });
+    }
+  }
+
+  async noConfirmtaxi(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      const taxi = await this.taxiRepo.findOne({
+        where: { user_id: user.user_id, taxi_call_type: 'taxi' },
+        order: [['createdAt', 'DESC']],
+      });
+      if (taxi) {
+        await taxi.update({ taxi_state: 'cancelled' });
+        await user.update({ last_state: 'finish' });
+        if (user.user_lang === 'UZB') {
+          await onMainUZB(ctx);
+        } else if (user.user_lang === 'RUS') {
+          await onMainRUS(ctx);
+        }
+      } else {
+        await ctx.reply('/start');
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
+  async ConfirmTaxi(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      const taxi = await this.taxiRepo.findOne({
+        where: { user_id: user.user_id, taxi_call_type: 'taxi' },
+        order: [['createdAt', 'DESC']],
+      });
+      if (taxi) {
+        if (taxi.info === 'confirm_location') {
+          await taxi.update({ info: 'confirm_price' });
+          let price;
+          let min_price = parseInt(process.env.MIN_PRICE);
+          let price_koef = parseFloat(process.env.PRICE_KOEF);
+          let distance = taxi.taxi_distance * 1000;
+          if (distance < 1000) {
+            price = min_price;
+          } else
+            price =
+              min_price +
+              +(((distance - 1000) * price_koef) / 1000).toFixed() * 1000;
+          await taxi.update({ taxi_price: price });
+          if (user.user_lang === 'UZB') {
+            await ctx.telegram.editMessageText(
+              user.user_id,
+              taxi.message_id,
+              null,
+              uzReplyMessages.suggested_price(taxi.taxi_price),
+              { parse_mode: 'HTML', ...uzKeyboards.iagree },
+            );
+          } else if (user.user_lang === 'RUS') {
+            await ctx.telegram.editMessageText(
+              user.user_id,
+              taxi.message_id,
+              null,
+              ruReplyMessages.suggested_price(taxi.taxi_price),
+              { parse_mode: 'HTML', ...ruKeyboards.iagree },
+            );
+          }
+        }
+      } else {
+        await ctx.reply('/start');
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
+  async ConfirmPrice(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      const taxi = await this.taxiRepo.findOne({
+        where: { user_id: user.user_id, taxi_call_type: 'taxi' },
+        order: [['createdAt', 'DESC']],
+      });
+      if (taxi) {
+        if (taxi.info === 'confirm_price') {
+          await taxi.update({ info: 'find_car' });
+
+          const drivers = await this.driverRepo.findAll({
+            where: { work_status: true },
+          });
+          if (drivers.length) {
+            for (let driver of drivers) {
+              let userDriver = await this.userRepo.findOne({
+                where: { user_id: String(ctx.from.id) },
+              });
+              if (!taxi.block_drivers.includes(driver.user_id)) {
+                if (userDriver?.user_lang == 'UZB') {
+                  await ctx.telegram.sendMessage(
+                    userDriver.user_id,
+                    `🔰 Yo'lovchi turgan manzil: ${taxi.from_full_adr} \n\n🏁 Yo'lovchini yetkazish manzili: ${taxi.to_full_adr} \n\nMasofa: ${taxi.taxi_distance} km\nVaqti: ${taxi.taxi_time} min`,
+                    {
+                      parse_mode: 'HTML',
+                      ...Markup.inlineKeyboard([
+                        Markup.button.callback(
+                          "📍 Jo'nash manzilini ko'rish",
+                          `show_location-${taxi.from_lat}-${taxi.from_long}`,
+                        ),
+                        Markup.button.callback(
+                          `✅ ${taxi.taxi_price} so'mga roziman`,
+                          `iwilltake=${taxi.id}`,
+                        ),
+                      ]),
+                    },
+                  );
+                } else if (userDriver.user_lang === 'RUS') {
+                  await ctx.telegram.sendMessage(
+                    userDriver.user_id,
+                    `🔰 Yo'lovchi turgan manzil: ${taxi.from_full_adr} \n\n🏁 Yo'lovchini yetkazish manzili: ${taxi.to_full_adr} \n\nMasofa: ${taxi.taxi_distance} km\nVaqti: ${taxi.taxi_time} min`,
+                    {
+                      parse_mode: 'HTML',
+                      ...Markup.inlineKeyboard([
+                        Markup.button.callback(
+                          "📍 Jo'nash manzilini ko'rish",
+                          `show_location-${taxi.from_lat}-${taxi.from_long}`,
+                        ),
+                        Markup.button.callback(
+                          `✅ ${taxi.taxi_price} so'mga roziman`,
+                          `iwilltake=${taxi.id}`,
+                        ),
+                      ]),
+                    },
+                  );
+                }
+              }
+            }
+          }
+
+          if (user.user_lang === 'UZB') {
+            await ctx.telegram.editMessageText(
+              user.user_id,
+              taxi.message_id,
+              null,
+              uzReplyMessages.waiting_find_taxi,
+              {
+                parse_mode: 'HTML',
+                ...uzKeyboards.cancel_inline,
+              },
+            );
+          } else if (user.user_lang === 'RUS') {
+            await ctx.telegram.editMessageText(
+              user.user_id,
+              taxi.message_id,
+              null,
+              ruReplyMessages.waiting_find_taxi,
+              {
+                parse_mode: 'HTML',
+                ...ruKeyboards.cancel_inline,
+              },
+            );
+          }
+        }
+      } else {
+        await ctx.reply('/start');
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
+  async confirmInDriverAndSendHisToUser(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      if ('match' in ctx) {
+        const driver = await this.driverRepo.findOne({
+          where: { user_id: user.user_id },
+        });
+        if (driver) {
+          const id = ctx.match[0].slice(10);
+          const taxi = await this.taxiRepo.findOne({ where: { id: +id } });
+          await user.update({ last_state: 'driver' });
+          if (taxi) {
+            if (taxi.info === 'find_car') {
+              await taxi.update({
+                driver_id: driver.user_id,
+                info: 'finish',
+                taxi_state: 'select_driver',
+              });
+              const user = await this.userRepo.findOne({
+                where: { user_id: taxi.user_id },
+              });
+              if (user) {
+                if (user.user_lang === 'UZB') {
+                  await ctx.telegram.sendMessage(
+                    user.user_id,
+                    uzReplyMessages.about_driver__for_user(
+                      driver.first_name,
+                      driver.phone_number,
+                      driver.car_model,
+                      driver.car_color,
+                      driver.car_number,
+                      taxi.taxi_price,
+                    ),
+                  );
+                } else if (user.user_lang === 'RUS') {
+                  await ctx.telegram.sendMessage(
+                    user.user_id,
+                    ruReplyMessages.about_driver__for_user(
+                      driver.first_name,
+                      driver.phone_number,
+                      driver.car_model,
+                      driver.car_color,
+                      driver.car_number,
+                      taxi.taxi_price,
+                    ),
+                  );
+                }
+              }
+
+              await ctx.reply(uzReplyMessages.req_calculate_distance);
+            }
+          } else {
+            await ctx.reply('/start');
+          }
+        } else {
+          await ctx.reply('/start');
+        }
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
+  async confirmInMyAddresses(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      if ('match' in ctx) {
+        console.log(ctx.match[0]);
+        const arr = ctx.match[0].split('=');
+        const from = arr[1];
+        const to = arr[3];
+        console.log(from, to);
+        const fromAd = await this.usAddrRepo.findOne({ where: { id: from } });
+        const toAd = await this.usAddrRepo.findOne({ where: { id: to } });
+        const taxi = await Taxi.create({
+          user_id: user.user_id,
+          from_full_adr: fromAd.full_address,
+          from_lat: fromAd.lat,
+          from_long: fromAd.lon,
+          to_full_adr: toAd.full_address,
+          to_lat: toAd.lat,
+          to_long: toAd.lon,
+          taxi_call_type:"taxi"
+        });
+        var config = {
+          method: 'GET',
+          url: `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${taxi.from_lat}%2C${taxi.from_long}&destinations=${taxi.to_lat}%2C${taxi.to_long}&key=${process.env.GOOGLE_API_KEY}`,
+          headers: {},
+        };
+        const response = await axios(config);
+        let distance_data = response.data;
+        let distance = (
+          distance_data.rows[0].elements[0].distance.value / 1000
+        ).toFixed(1);
+        let time = (
+          distance_data.rows[0].elements[0].duration.value / 60
+        ).toFixed();
+
+        taxi.update({
+          taxi_distance: +distance,
+          taxi_time: +time,
+          taxi_state: 'driver',
+          info: 'confirm_location',
+        });
+        await taxi.save();
+
+        if (user.user_lang === 'UZB') {
+          await ctx.reply('Manzillarni tasdiqlang');
+          const message = await ctx.reply(
+            `🔰 Jo'nash manzilingiz: ${taxi.from_full_adr}\n\n🏁 Borish manzilingiz: ${taxi.to_full_adr}\n\nMasofa: ${distance} km\nVaqti: ${time} min`,
+            {
+              parse_mode: 'HTML',
+              ...Markup.inlineKeyboard([
+                Markup.button.callback('✅ Tasdiqlayman', 'okconfirmlocation'),
+                Markup.button.callback('🙅‍♀️ Bekor qilish', 'noconfirmlocation'),
+              ]),
+            },
+          );
+          taxi.update({ message_id: message.message_id });
+          await taxi.save();
+        } else if (user.user_lang === 'RUS') {
+          await ctx.reply('Manzillarni tasdiqlang');
+          const message = await ctx.reply(
+            `🔰 Адрес отправления: ${taxi.from_full_adr}\n\n🏁 Адрес назначения: ${taxi.to_full_adr}\n\nРасстояние: ${distance} км\nВремя: ${time} мин`,
+            {
+              parse_mode: 'HTML',
+              ...Markup.inlineKeyboard([
+                Markup.button.callback('✅ Подтверждаю', 'okconfirmlocation'),
+                Markup.button.callback('🙅‍♀️ Отменить', 'noconfirmlocation'),
+              ]),
+            },
+          );
+          taxi.update({ message_id: message.message_id });
+          await taxi.save();
+        }
+      } else {
+        await ctx.reply('/start');
+      }
     }
   }
 }

@@ -109,13 +109,13 @@ export const uzReplyMessages = {
 
   about_driver__for_user: (
     name: string,
-    phone: number,
+    phone: string,
     carModel: string,
     carColor: string,
     carNumber: string,
     totalPrice: number,
   ) => {
-    return `Haydovchi ismi: ${name}\nTelefon raqami: ${phone}\nAvtomobil modeli: ${carModel}\nAvtomobil ragi: ${carColor}\nAvtomobil raqami: ${carNumber}\nXizmat narxi: ${totalPrice}`;
+    return `Haydovchi ismi: ${name}\nTelefon raqami: ${phone}\nAvtomobil modeli: ${carModel}\nAvtomobil rangi: ${carColor}\nAvtomobil raqami: ${carNumber}\nXizmat narxi: ${totalPrice}`;
   },
 
   driver_distance_from_user: (totalTime: number, totalDistance: number) => {

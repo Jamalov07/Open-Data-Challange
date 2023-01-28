@@ -108,7 +108,7 @@ export const ruReplyMessages = {
 
   about_driver__for_user: (
     name: string,
-    phone: number,
+    phone: string,
     carModel: string,
     carColor: string,
     carNumber: string,

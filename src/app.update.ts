@@ -100,6 +100,16 @@ export class AppUpdate {
     await this.userService.deleteMyAddress(ctx);
   }
 
+  @Action(/^(to=\d+=from=\d+)/)
+  async inThisDirection(@Ctx() ctx: Context) {
+    await this.userService.confirmInMyAddresses(ctx);
+  }
+
+  @Action(/^(iwilltake=\d+)/)
+  async saveMytoThis(@Ctx() ctx: Context) {
+    await this.userService.confirmInDriverAndSendHisToUser(ctx);
+  }
+
   @Action('forcallingtaxi')
   async forCallingTaxi(@Ctx() ctx: Context) {
     await this.userService.actionForCallingTaxi(ctx);
@@ -123,6 +133,21 @@ export class AppUpdate {
   @Action('replacelang')
   async actionForChangeLang(@Ctx() ctx: Context) {
     await this.userService.actionForChangeLang(ctx);
+  }
+
+  @Action('noconfirmlocation')
+  async noConfirmLocation(@Ctx() ctx: Context) {
+    await this.userService.noConfirmtaxi(ctx);
+  }
+
+  @Action('okconfirmlocation')
+  async confirmLocation(@Ctx() ctx: Context) {
+    await this.userService.ConfirmTaxi(ctx);
+  }
+
+  @Action('okconfirmprice')
+  async confirmPrice(@Ctx() ctx: Context) {
+    await this.userService.ConfirmPrice(ctx);
   }
 
   @Hears(['🚖 Taksi chaqirish 🙋‍♀️', '🚖 Вызов такси 🙋‍♀️'])
@@ -215,60 +240,60 @@ export class AppUpdate {
   async onLocation(@Ctx() ctx: Context) {
     await this.userService.onLocation(ctx);
   }
-//==============
+  //==============
 
   @Hears("👩🏼‍💻 Ro'yxatdan o'tish")
-  async registrationDriver(@Ctx() ctx:Context) {
-    return this.userService.registrationDriver(ctx,'UZB');
+  async registrationDriver(@Ctx() ctx: Context) {
+    return this.userService.registrationDriver(ctx, 'UZB');
   }
 
-  @Hears("👩🏼‍💻 Зарегистрироваться")
-  async registrationDriverRu(@Ctx() ctx:Context) {
-    return this.userService.registrationDriver(ctx,'RUS');
+  @Hears('👩🏼‍💻 Зарегистрироваться')
+  async registrationDriverRu(@Ctx() ctx: Context) {
+    return this.userService.registrationDriver(ctx, 'RUS');
   }
 
   @Hears('🚕 Hozirdan ishlayman !')
-  async workStatusTrue(@Ctx() ctx:Context) {
-    return this.userService.workStatusTrue(ctx,'UZB');
+  async workStatusTrue(@Ctx() ctx: Context) {
+    return this.userService.workStatusTrue(ctx, 'UZB');
   }
   @Hears('🛋 Hozircha dam olaman')
-  async workStatusFalse(@Ctx() ctx:Context) {
-    return this.userService.workStatusFalse(ctx,'UZB');
+  async workStatusFalse(@Ctx() ctx: Context) {
+    return this.userService.workStatusFalse(ctx, 'UZB');
   }
 
   @Hears('🚕 Я сейчас работаю !')
-  async workStatusTrueRU(@Ctx() ctx:Context) {
-    return this.userService.workStatusTrue(ctx,'RUS');
+  async workStatusTrueRU(@Ctx() ctx: Context) {
+    return this.userService.workStatusTrue(ctx, 'RUS');
   }
 
   @Hears('🛋 Я пока отдохну')
-  async workStatusFalseRU(@Ctx() ctx:Context) {
-    return this.userService.workStatusFalse(ctx,'RUS');
+  async workStatusFalseRU(@Ctx() ctx: Context) {
+    return this.userService.workStatusFalse(ctx, 'RUS');
   }
 
   @Hears("⛔️ Ishni to'xtatish")
-  async stopWorking(@Ctx() ctx:Context) {
-    return this.userService.workStatusFalse(ctx,'UZB');
+  async stopWorking(@Ctx() ctx: Context) {
+    return this.userService.workStatusFalse(ctx, 'UZB');
   }
 
   @Hears('⛔️ Остановить работу')
-  async stopWorkingRU(@Ctx() ctx:Context) {
-    return this.userService.workStatusFalse(ctx,'RUS');
+  async stopWorkingRU(@Ctx() ctx: Context) {
+    return this.userService.workStatusFalse(ctx, 'RUS');
   }
 
   @Action(/^(verify=\d+)/)
-  async verifyDriver(@Ctx() ctx:Context) {
+  async verifyDriver(@Ctx() ctx: Context) {
     return this.userService.verifyDriver(ctx);
   }
 
   @Action(/^(otmen=\d+)/)
-  async notAccessDriver(@Ctx() ctx:Context) {
+  async notAccessDriver(@Ctx() ctx: Context) {
     return this.userService.notAccesDriver(ctx);
   }
 
   @Action('checkDriverStatus')
   async checkDriverStatus(@Ctx() ctx: Context) {
-    return this.userService.checkDriverStatus(ctx)
+    return this.userService.checkDriverStatus(ctx);
   }
 
   @On('message')

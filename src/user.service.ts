@@ -336,6 +336,28 @@ export class UserService {
                 .resize(),
             });
           }
+        } else if (user.last_state === 'change_phone') {
+          await user.update({
+            ads_phone_number: ctx.message.text,
+            last_state: 'finish',
+          });
+          if (user.user_lang === 'UZB') {
+            await ctx.reply(
+              `Telefon raqamingiz ${user.ads_phone_number} ga o'zgartirildi`,
+              {
+                parse_mode: 'HTML',
+                ...uzKeyboards.main_menu,
+              },
+            );
+          } else if (user.user_lang === 'RUS') {
+            await ctx.reply(
+              `ваш номер телефона изменился на ${user.ads_phone_number}`,
+              {
+                parse_mode: 'HTML',
+                ...ruKeyboards.main_menu,
+              },
+            );
+          }
         }
       }
     } else {
@@ -490,6 +512,36 @@ export class UserService {
           await ctx.reply('Введите новый номер телефона', {
             parse_mode: 'HTML',
             ...ruKeyboards.cancel_replace_phone,
+          });
+        }
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
+  async hearsMyAddresses(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      if (user.last_state === 'finish') {
+        const userAddresses = await this.usAddrRepo.findAll({
+          where: { user_id: `${ctx.from.id}` },
+        });
+        if (user.user_lang === 'UZB') {
+          await ctx.reply(uzReplyMessages.input_constant_address, {
+            parse_mode: 'HTML',
+            ...uzKeyboards.input_constant_address,
+          });
+          
+          for (let i = 0; i < userAddresses.length; i++){
+            
+          }
+        } else if (user.user_lang === 'RUS') {
+          await ctx.reply(ruReplyMessages.input_constant_address, {
+            parse_mode: 'HTML',
+            ...ruKeyboards.input_constant_address,
           });
         }
       }

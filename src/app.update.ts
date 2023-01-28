@@ -57,12 +57,15 @@ export class AppUpdate {
     await this.userService.hearsProfil(ctx);
   }
 
-  @Action("replacename")
+  @Action('replacename')
   async replaceName(@Ctx() ctx: Context) {
     await this.userService.replaceName(ctx);
   }
 
-  
+  @Action('replacenumber')
+  async replacePhoneNumber(@Ctx() ctx: Context) {
+    await this.userService.replacePhoneNumber(ctx);
+  }
 
   @On('message')
   async onMessage(@Ctx() ctx: Context) {

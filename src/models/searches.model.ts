@@ -1,8 +1,8 @@
 import { Column, DataType, Model, Table } from "sequelize-typescript";
 
 interface SearchAttr {
-  request?: number;
-  founds?: string;
+  request?: string;
+  founds?: number;
   request_count?: number;
 }
 

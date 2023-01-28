@@ -121,7 +121,7 @@ export const uzKeyboards = {
     return Markup.inlineKeyboard([
       Markup.button.callback(
         "Shu yo'nalishda kerak 🙋‍♀️",
-        `to=${first},from=${second}`,
+        `to=${first}=from=${second}`,
       ),
     ]);
   },

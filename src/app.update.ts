@@ -53,8 +53,18 @@ export class AppUpdate {
   }
 
   @Hears('👩‍🔧 Profil')
-  async hearsProfil(@Ctx() ctx: Context) {
+  async hearsProfilUz(@Ctx() ctx: Context) {
     await this.userService.hearsProfil(ctx);
+  }
+
+  @Hears('👩‍🔧 Профиль')
+  async hearsProfilRu(@Ctx() ctx: Context) {
+    await this.userService.hearsProfil(ctx);
+  }
+
+  @Hears(['🏠 Doimiy manzillar', '🏠 Постоянные адреса'])
+  async hearsPermanentAddresses(@Ctx() ctx: Context) {
+    await this.userService.hearsPermanentAddresses(ctx);
   }
 
   @Action('replacename')
@@ -65,6 +75,132 @@ export class AppUpdate {
   @Action('replacenumber')
   async replacePhoneNumber(@Ctx() ctx: Context) {
     await this.userService.replacePhoneNumber(ctx);
+  }
+
+  @Action('repaddress')
+  async editMyAddresses(@Ctx() ctx: Context) {
+    await this.userService.hearsMyAddresses(ctx);
+  }
+
+  @Action('mynewconstaddress')
+  async myNewAddress(@Ctx() ctx: Context) {
+    await this.userService.actioMyNewAddress(ctx);
+  }
+
+  @Action(/^(deletemy=\d+)/)
+  async deleteMyAddress(@Ctx() ctx: Context) {
+    await this.userService.deleteMyAddress(ctx);
+  }
+
+  @Action('forcallingtaxi')
+  async forCallingTaxi(@Ctx() ctx: Context) {
+    await this.userService.actionForCallingTaxi(ctx);
+  }
+
+  @Action('contract')
+  async userContract(@Ctx() ctx: Context) {
+    await this.userService.actionForUserContract(ctx);
+  }
+
+  @Action('contactus')
+  async contactWith(@Ctx() ctx: Context) {
+    await this.userService.contactWithUs(ctx);
+  }
+
+  @Action('mainmenu')
+  async toMainMenu(@Ctx() ctx: Context) {
+    await this.userService.toMainMenu(ctx);
+  }
+
+  @Action('replacelang')
+  async actionForChangeLang(@Ctx() ctx: Context) {
+    await this.userService.actionForChangeLang(ctx);
+  }
+
+  @Hears(['🚖 Taksi chaqirish 🙋‍♀️', '🚖 Вызов такси 🙋‍♀️'])
+  async callTaxi(@Ctx() ctx: Context) {
+    await this.userService.hearsCallTaxi(ctx);
+  }
+
+  @Hears('🚚 Yetkazib berish 🙋🏻‍♀️')
+  async deliveryUZB(@Ctx() ctx: Context) {
+    return await this.userService.delivery(ctx, 'UZB');
+  }
+  @Hears('🚚 Служба доставки 🙋🏻‍♀️')
+  async deliveryRUS(@Ctx() ctx: Context) {
+    return await this.userService.delivery(ctx, 'RUS');
+  }
+
+  @Hears('🙅‍♀️ Bekor qilish')
+  async cancelledUZB(@Ctx() ctx: Context) {
+    return await this.userService.canselled(ctx);
+  }
+  @Hears('🙅‍♀️ Отмена')
+  async cancelledRUS(@Ctx() ctx: Context) {
+    return await this.userService.canselled(ctx);
+  }
+  @Hears(['Машина сломалась 😔', 'Mashina buzilib qoldi 😔'])
+  async broken_car(@Ctx() ctx: Context) {
+    return await this.userService.brokenCar(ctx);
+  }
+
+  @Action('cancelled')
+  async cancelled(@Ctx() ctx: Context) {
+    return await this.userService.canselled(ctx);
+  }
+  @Action(/(from-delivery-\d+)/)
+  async onFromDelivery(@Ctx() ctx: Context) {
+    return await this.userService.onFromDelivery(ctx);
+  }
+  @Action(/(to-delivery-\d+)/)
+  async onToDelivery(@Ctx() ctx: Context) {
+    return await this.userService.onToDelivery(ctx);
+  }
+  @Action('accepted')
+  async onAccepted(@Ctx() ctx: Context) {
+    return await this.userService.onAccepted(ctx);
+  }
+  @Action('confirmed')
+  async onConfirmed(@Ctx() ctx: Context) {
+    return await this.userService.onConfirmed(ctx);
+  }
+  @Action('cancelled_taxi')
+  async cancelled_taxi(@Ctx() ctx: Context) {
+    return await this.userService.cancelled_taxi(ctx);
+  }
+  @Action('broken_car')
+  async brokenCar(@Ctx() ctx: Context) {
+    return await this.userService.brokenCar(ctx);
+  }
+  @Action(/(confirm_driver-[^c])/)
+  async onConfirmDriver(@Ctx() ctx: Context) {
+    return await this.userService.onConfirmDriver(ctx);
+  }
+  @Action(/(show_location[^c])/)
+  async onShowLocation(@Ctx() ctx: Context) {
+    return await this.userService.onShowLocation(ctx);
+  }
+
+  @Action('on_from_location')
+  async on_from_location(@Ctx() ctx: Context) {
+    return await this.userService.onFromLocation(ctx);
+  }
+  @Action('start_location')
+  async start_location(@Ctx() ctx: Context) {
+    return await this.userService.start_taxi_action(ctx);
+  }
+  @Action('finish_location')
+  async finish_location(@Ctx() ctx: Context) {
+    return await this.userService.finish_location(ctx);
+  }
+  @Action(/(marking-\d+)/)
+  async marking(@Ctx() ctx: Context) {
+    return await this.userService.marking(ctx);
+  }
+
+  @On('location')
+  async onLocation(@Ctx() ctx: Context) {
+    await this.userService.onLocation(ctx);
   }
 
   @On('message')

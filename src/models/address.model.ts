@@ -6,8 +6,8 @@ interface AddressAttr {
   coordinate_lon: number;
   address_name: string;
   address_text: string;
-  bounded_to_lat: number;
-  bunded_top_lon: number;
+  bounded_top_lat: number;
+  bounded_top_lon: number;
   bounded_bottom_lat: number;
   bounded_bottom_lon: number;
   full_text: string;
@@ -34,7 +34,7 @@ export class Address extends Model<Address, AddressAttr> {
   @Column({ type: DataType.STRING })
   address_text: string;
   @Column({ type: DataType.INTEGER })
-  bounded_to_lat: number;
+  bounded_top_lat: number;
   @Column({ type: DataType.INTEGER })
   bunded_top_lon: number;
   @Column({ type: DataType.INTEGER })

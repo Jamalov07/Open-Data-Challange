@@ -11,7 +11,7 @@ interface DriverAttrs {
   car_number: string;
   car_color: string;
   car_photo: string;
-  work_status: string;
+  work_status: boolean;
   last_lat: string;
   last_lon: string;
   last_state: string;
@@ -47,8 +47,8 @@ export class Driver extends Model<Driver, DriverAttrs> {
   car_color: string;
   @Column({ type: DataType.STRING })
   car_photo: string;
-  @Column({ type: DataType.STRING })
-  work_status: string;
+  @Column({ type: DataType.BOOLEAN })
+  work_status: boolean;
   @Column({ type: DataType.STRING })
   last_lat: string;
   @Column({ type: DataType.STRING })

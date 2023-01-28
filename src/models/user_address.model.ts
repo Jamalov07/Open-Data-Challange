@@ -20,8 +20,7 @@ export class UserAddress extends Model<UserAddress, UserAddressAttr> {
   id: number;
   @Column({
     type: DataType.STRING,
-    allowNull: false,
-    unique: true,
+    allowNull: false
   })
   user_id: string;
 

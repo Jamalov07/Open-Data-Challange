@@ -123,7 +123,7 @@ export const ruKeyboards = {
     return Markup.inlineKeyboard([
       Markup.button.callback(
         'Необходимо в этом направлении 🙋‍♀️',
-        `to=${first},from=${second}`,
+        `to=${first}=from=${second}`,
       ),
     ]);
   },

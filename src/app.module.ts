@@ -2,12 +2,16 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { TelegrafModule } from 'nestjs-telegraf';
+import { AppUpdate } from './app.update';
+import { DriverService } from './driver.service';
+import { MessageService } from './message.service';
 import { Address } from './models/address.model';
 import { Driver } from './models/drivers.model';
 import { Search } from './models/searches.model';
 import { Taxi } from './models/taxi.model';
 import { User } from './models/users.model';
 import { UserAddress } from './models/user_address.model';
+import { UserService } from './user.service';
 
 @Module({
   imports: [
@@ -36,6 +40,6 @@ import { UserAddress } from './models/user_address.model';
     }),
   ],
 
-  providers: [],
+  providers: [AppUpdate, UserService,DriverService,MessageService],
 })
 export class AppModule {}

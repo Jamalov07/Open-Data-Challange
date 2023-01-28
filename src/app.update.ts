@@ -27,6 +27,16 @@ export class AppUpdate {
     await this.userService.saveLang(ctx, 'RUS');
   }
 
+  @Hears("✅ Ro'yxatdan o'tish")
+  async registrationUZ(@Ctx() ctx: Context) {
+    await this.userService.registration(ctx);
+  }
+
+  @Hears('✅ Зарегистрироваться')
+  async registrationRU(@Ctx() ctx: Context) {
+    await this.userService.registration(ctx);
+  }
+
   @On('contact')
   async phoneNumber(@Ctx() ctx: Context) {
     await this.userService.onContact(ctx);
@@ -35,5 +45,20 @@ export class AppUpdate {
   @Action('savedefaultname')
   async saveDefaultName(@Ctx() ctx: Context) {
     await this.userService.saveDefaultName(ctx);
+  }
+
+  @Action('savedefaultphone')
+  async saveDefaultPhone(@Ctx() ctx: Context) {
+    await this.userService.saveDefaultNumber(ctx);
+  }
+
+  @Hears('👩‍🔧 Profil')
+  async hearsProfil(@Ctx() ctx: Context) {
+    await this.userService.hearsProfil(ctx);
+  }
+
+  @On('message')
+  async onMessage(@Ctx() ctx: Context) {
+    await this.userService.onMessage(ctx);
   }
 }

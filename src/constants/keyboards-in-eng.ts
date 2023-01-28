@@ -1,6 +1,6 @@
 import { Markup } from 'telegraf';
 
-export const uzKeyboards = {
+export const engKeyboards = {
   lang_selection: Markup.keyboard([
     ["🇺🇿 O'zbek tili"],
     ['🇷🇺 Русский язык'],

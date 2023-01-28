@@ -90,14 +90,19 @@ export const ruKeyboards = {
   iatrest: Markup.keyboard(['🛋 я на досуге']).oneTime().resize(),
 
   profile: Markup.inlineKeyboard([
-    Markup.button.callback('🙍‍♀️ Изменить имя', 'replacename'),
-    Markup.button.callback('📲 Изменить номер телефона', 'replacenumber'),
-    Markup.button.callback('🏠 Смена постоянных адресов', 'repaddress'),
-    Markup.button.callback('🌐 Изменить язык', 'replacelang'),
-    Markup.button.callback('💁‍♀️ Порядок вызова такси', 'forcallingtaxi'),
-    Markup.button.callback('📄 Пользовательское Соглашение', 'contract'),
-    Markup.button.callback(' ☎️ Связаться со службой Леди Такси', 'contactus'),
-    Markup.button.callback('👩‍🦳 Главная страница', 'mainmenu'),
+    [Markup.button.callback('🙍‍♀️ Изменить имя', 'replacename')],
+    [Markup.button.callback('📲 Изменить номер телефона', 'replacenumber')],
+    [Markup.button.callback('🏠 Смена постоянных адресов', 'repaddress')],
+    [Markup.button.callback('🌐 Изменить язык', 'replacelang')],
+    [Markup.button.callback('💁‍♀️ Порядок вызова такси', 'forcallingtaxi')],
+    [Markup.button.callback('📄 Пользовательское Соглашение', 'contract')],
+    [
+      Markup.button.callback(
+        ' ☎️ Связаться со службой Леди Такси',
+        'contactus',
+      ),
+    ],
+    [Markup.button.callback('👩‍🦳 Главная страница', 'mainmenu')],
   ]),
 
   input_constant_address: Markup.inlineKeyboard([

@@ -9,6 +9,8 @@ import { User } from './models/users.model';
 import { UserAddress } from './models/user_address.model';
 import { uzReplyMessages } from './constants/reply-messages-in-uzb';
 import { ruReplyMessages } from './constants/reply-messages-in-ru';
+import { uzKeyboards } from './constants/keyboards-in-uzb';
+import { ruKeyboards } from './constants/keyboards-in-rus';
 @Injectable()
 export class UserService {
   constructor(
@@ -107,6 +109,43 @@ export class UserService {
     }
   }
 
+  async registration(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      if (user.last_state === 'phone_number') {
+        if (user.user_lang == 'UZB') {
+          await ctx.reply(
+            `Iltimos o'zingizni raqamingizni yuboring, <b>"Telefon raqamni yuborish"</b> tugmasini bosing! `,
+            {
+              parse_mode: 'HTML',
+              ...Markup.keyboard([
+                [Markup.button.contactRequest('📞 Telefon raqamni yuborish')],
+              ])
+                .oneTime()
+                .resize(),
+            },
+          );
+        } else if (user.user_lang === 'RUS') {
+          await ctx.reply(
+            ` Пожалуйста, пришлите свой номер, нажмите <b>"Отправить номер телефона"</b>! `,
+            {
+              parse_mode: 'HTML',
+              ...Markup.keyboard([
+                [Markup.button.contactRequest('📞 Отправить номер телефона')],
+              ])
+                .oneTime()
+                .resize(),
+            },
+          );
+        }
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
   async onContact(ctx: Context) {
     const user = await this.userRepo.findOne({
       where: { user_id: `${ctx.from.id}` },
@@ -129,7 +168,7 @@ export class UserService {
                   ...Markup.inlineKeyboard([
                     Markup.button.callback(
                       `Men ${ctx.from.first_name} ismini tanlayman`,
-                      'defaultsave',
+                      'savedefaultname',
                     ),
                   ]),
                 },
@@ -271,6 +310,12 @@ export class UserService {
                 .resize(),
             });
           }
+        } else if (user.last_state === 'change_name') {
+          await user.update({
+            real_name: ctx.message.text,
+            last_state: 'finish',
+          });
+          
         }
       }
     } else {
@@ -333,7 +378,10 @@ export class UserService {
     });
     if (user) {
       if (user.last_state === 'ads_phone_number') {
-        await user.update({ ads_phone_number: user.phone_number });
+        await user.update({
+          ads_phone_number: user.phone_number,
+          last_state: 'finish',
+        });
         if (user.user_lang === 'UZB') {
           await ctx.reply(
             `Siz muvaffaqqiyatli ro'yxatdan o'tdingiz!\n«Lady Taxi» xizmatlaridan foydalanishingiz mumkin!`,
@@ -361,6 +409,44 @@ export class UserService {
               .resize(),
           });
         }
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
+  async hearsProfil(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      if (user.user_lang === 'UZB') {
+        await ctx.reply(uzReplyMessages.select_section, {
+          parse_mode: 'HTML',
+          ...uzKeyboards.profile,
+        });
+      } else if (user.user_lang === 'RUS') {
+        await ctx.reply(ruReplyMessages.select_section, {
+          parse_mode: 'HTML',
+          ...ruKeyboards.profile,
+        });
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
+  async replaceName(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      if (user.last_state === 'finish') {
+        await user.update({ last_state: 'change_name' });
+        await ctx.reply(uzReplyMessages.input_name, {
+          parse_mode: 'HTML',
+          ...uzKeyboards.cancel_replace_name,
+        });
       }
     } else {
       await ctx.reply('/start');

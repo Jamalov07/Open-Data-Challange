@@ -90,14 +90,14 @@ export const uzKeyboards = {
   iatrest: Markup.keyboard(['🛋 DAMDAMAN']).oneTime().resize(),
 
   profile: Markup.inlineKeyboard([
-    Markup.button.callback("🙍‍♀️ Ismni o'zgartirish", 'replacename'),
-    Markup.button.callback("📲 Telefon raqamni o'zgartirish", 'replacenumber'),
-    Markup.button.callback("🏠 Doimiy manzillarni o'zgartirish", 'repaddress'),
-    Markup.button.callback("🌐 Tilni o'zgartirish", 'replacelang'),
-    Markup.button.callback('💁‍♀️ Taksi chaqirish tartibi', 'forcallingtaxi'),
-    Markup.button.callback('📄 Foydalanuvchi shartnomasi', 'contract'),
-    Markup.button.callback(" ☎️ Lady Taxi xizmatiga bog'lanish", 'contactus'),
-    Markup.button.callback('👩‍🦳 Asosiy sahifa', 'mainmenu'),
+    [Markup.button.callback("🙍‍♀️ Ismni o'zgartirish", 'replacename')],
+    [Markup.button.callback("📲 Telefon raqamni o'zgartirish", 'replacenumber')],
+    [Markup.button.callback("🏠 Doimiy manzillarni o'zgartirish", 'repaddress')],
+    [Markup.button.callback("🌐 Tilni o'zgartirish", 'replacelang')],
+    [Markup.button.callback('💁‍♀️ Taksi chaqirish tartibi', 'forcallingtaxi')],
+    [Markup.button.callback('📄 Foydalanuvchi shartnomasi', 'contract')],
+    [Markup.button.callback(" ☎️ Lady Taxi xizmatiga bog'lanish", 'contactus')],
+    [Markup.button.callback('👩‍🦳 Asosiy sahifa', 'mainmenu')],
   ]),
 
   input_constant_address: Markup.inlineKeyboard([

@@ -7,6 +7,7 @@ import { DriverService } from './driver.service';
 import { MessageService } from './message.service';
 import { Address } from './models/address.model';
 import { Driver } from './models/drivers.model';
+import { Microbus } from './models/microbus.model';
 import { Search } from './models/searches.model';
 import { Taxi } from './models/taxi.model';
 import { User } from './models/users.model';
@@ -26,6 +27,7 @@ import { UserService } from './user.service';
       Search,
       Taxi,
       UserAddress,
+      Microbus,
     ]),
     SequelizeModule.forRoot({
       dialect: 'postgres',
@@ -34,12 +36,12 @@ import { UserService } from './user.service';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, Address, Driver, Search, Taxi, UserAddress],
+      models: [User, Address, Driver, Search, Taxi, UserAddress, Microbus],
       autoLoadModels: true,
       logging: false,
     }),
   ],
 
-  providers: [AppUpdate, UserService,DriverService,MessageService],
+  providers: [AppUpdate, UserService, DriverService, MessageService],
 })
 export class AppModule {}

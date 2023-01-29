@@ -14,6 +14,7 @@ import { ruKeyboards } from './constants/keyboards-in-rus';
 import { getFullName } from './helpers/getFullAddressName';
 import axios from 'axios';
 import { onMainRUS, onMainUZB } from './helpers/onMain';
+import { Microbus } from './models/microbus.model';
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,7 @@ export class UserService {
     @InjectModel(Address) private readonly addressRepo: typeof Address,
     @InjectModel(UserAddress) private readonly usAddrRepo: typeof UserAddress,
     @InjectModel(Driver) private readonly driverRepo: typeof Driver,
+    @InjectModel(Microbus) private readonly microbusRepo: typeof Microbus,
   ) {}
 
   async onStart(ctx: Context) {
@@ -390,7 +392,7 @@ export class UserService {
           }
           if (taxi.taxi_state === 'from_location' && 'text' in ctx.message) {
             let str: string[];
-            if (!(user?.user_lang === 'UZB')) {
+            if (user?.user_lang === 'UZB') {
               str = [
                 'Kiritilgan manzilni qidirish natijasi:',
                 "Mo'ljal:",
@@ -1625,13 +1627,13 @@ export class UserService {
           'Выберите адрес доставки с помощью кнопки 📎 Телеграма или ✏️ отправьте адрес в виде сообщения:',
           '🙅‍♀️ Отмена',
         ];
-        await ctx.reply(str[0], {
-          parse_mode: 'HTML',
-          ...Markup.keyboard([[str[1]]])
-            .oneTime()
-            .resize(),
-        });
       }
+      await ctx.reply(str[0], {
+        parse_mode: 'HTML',
+        ...Markup.keyboard([[str[1]]])
+          .oneTime()
+          .resize(),
+      });
       taxi.from_lat = String(place.coordinate_lat);
       taxi.from_long = String(place.coordinate_lon);
       taxi.from_full_adr = `${place.address_name}, ${place.address_text}`;
@@ -1641,6 +1643,7 @@ export class UserService {
       console.log(error);
     }
   }
+
   async onToDelivery(ctx: Context) {
     try {
       let id: number;
@@ -1804,7 +1807,7 @@ export class UserService {
       if (drivers.length > 0) {
         for (let driver of drivers) {
           let userDriver = await this.userRepo.findOne({
-            where: { user_id: String(ctx.from.id) },
+            where: { user_id: driver.user_id },
           });
           if (!taxi.block_drivers.includes(driver.user_id)) {
             if (userDriver?.user_lang == 'UZB') {
@@ -2609,7 +2612,7 @@ export class UserService {
           if (drivers.length) {
             for (let driver of drivers) {
               let userDriver = await this.userRepo.findOne({
-                where: { user_id: String(ctx.from.id) },
+                where: { user_id: driver.user_id },
               });
               if (!taxi.block_drivers.includes(driver.user_id)) {
                 if (userDriver?.user_lang == 'UZB') {
@@ -2771,7 +2774,7 @@ export class UserService {
           to_full_adr: toAd.full_address,
           to_lat: toAd.lat,
           to_long: toAd.lon,
-          taxi_call_type:"taxi"
+          taxi_call_type: 'taxi',
         });
         var config = {
           method: 'GET',
@@ -2829,4 +2832,60 @@ export class UserService {
       }
     }
   }
+
+  async hearsMicroBus(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      const busDirections = await this.microbusRepo.findAll();
+      let directions = [];
+      for (let i = 0; i < busDirections.length; i++) {
+        directions.push([
+          Markup.button.callback(
+            `${busDirections[i].full_direction_names}`,
+            `seethis=${busDirections[i].id}`,
+          ),
+        ]);
+      }
+      if (user.user_lang === 'UZB') {
+        await ctx.reply("Mavjud yo'nalishlar", {
+          parse_mode: 'HTML',
+          ...Markup.inlineKeyboard([...directions]),
+        });
+      } else if (user.user_lang === 'RUS') {
+        await ctx.reply('Доступные маршруты', {
+          parse_mode: 'HTML',
+          ...Markup.inlineKeyboard([...directions]),
+        });
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
+  async showBusDirection(ctx: Context) {
+    const user = await this.userRepo.findOne({
+      where: { user_id: `${ctx.from.id}` },
+    });
+    if (user) {
+      if ('match' in ctx) {
+        const id = ctx.match[0].split('=')[1];
+        const busDirection = await this.microbusRepo.findOne({
+          where: { id: +id },
+        });
+        console.log(busDirection);
+        if (user.user_lang === "UZB") {
+          // console.log(__dirname+busDirection.photo);
+          const str = `🚍 Yo'nalish nomi: ${busDirection.full_direction_names}\n🕐 Qatnov vaqti: ${busDirection.work_time} gacha\n🚎 Mikroavtobuslar soni: ${busDirection.total_busses} ta\n🛣 Masofa: ${busDirection.direction_distance} km\n💷 Narxi: ${busDirection.price} so'm\n⏳ Borish vaqti: ${busDirection.finish_time} min`
+          await ctx.replyWithPhoto({ source:__dirname+busDirection.photo},{caption:str})
+        } else if (user.user_lang === "RUS") {
+          
+        }
+      }
+    } else {
+      await ctx.reply('/start');
+    }
+  }
+
 }

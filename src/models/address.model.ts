@@ -25,22 +25,22 @@ export class Address extends Model<Address, AddressAttr> {
 
   @Column({ type: DataType.INTEGER })
   request_id: number;
-  @Column({ type: DataType.INTEGER })
+  @Column({ type: DataType.DOUBLE })
   coordinate_lat: number;
-  @Column({ type: DataType.INTEGER })
+  @Column({ type: DataType.DOUBLE })
   coordinate_lon: number;
   @Column({ type: DataType.STRING })
   address_name: string;
   @Column({ type: DataType.STRING })
   address_text: string;
-  @Column({ type: DataType.INTEGER })
+  @Column({ type: DataType.DOUBLE })
   bounded_top_lat: number;
-  @Column({ type: DataType.INTEGER })
+  @Column({ type: DataType.DOUBLE })
   bunded_top_lon: number;
-  @Column({ type: DataType.INTEGER })
+  @Column({ type: DataType.DOUBLE })
   bounded_bottom_lat: number;
-  @Column({ type: DataType.INTEGER })
+  @Column({ type: DataType.DOUBLE })
   bounded_bottom_lon: number;
-  @Column({ type: DataType.STRING })
+  @Column({ type: DataType.STRING(1000) })
   full_text: string;
 }

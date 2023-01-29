@@ -12,6 +12,7 @@ export const uzKeyboards = {
   main_menu: Markup.keyboard([
     ['🚖 Taksi chaqirish 🙋‍♀️', '🚚 Yetkazib berish 🙋🏻‍♀️'],
     ['👩‍🔧 Profil', '🏠 Doimiy manzillar'],
+    ['🚌 Mikro avtobuslar'],
   ])
     .oneTime()
     .resize(),
@@ -91,8 +92,18 @@ export const uzKeyboards = {
 
   profile: Markup.inlineKeyboard([
     [Markup.button.callback("🙍‍♀️ Ismni o'zgartirish", 'replacename')],
-    [Markup.button.callback("📲 Telefon raqamni o'zgartirish", 'replacenumber')],
-    [Markup.button.callback("🏠 Doimiy manzillarni o'zgartirish", 'repaddress')],
+    [
+      Markup.button.callback(
+        "📲 Telefon raqamni o'zgartirish",
+        'replacenumber',
+      ),
+    ],
+    [
+      Markup.button.callback(
+        "🏠 Doimiy manzillarni o'zgartirish",
+        'repaddress',
+      ),
+    ],
     [Markup.button.callback("🌐 Tilni o'zgartirish", 'replacelang')],
     [Markup.button.callback('💁‍♀️ Taksi chaqirish tartibi', 'forcallingtaxi')],
     [Markup.button.callback('📄 Foydalanuvchi shartnomasi', 'contract')],

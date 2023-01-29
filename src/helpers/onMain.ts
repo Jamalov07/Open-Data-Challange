@@ -12,6 +12,7 @@ export async function onMainUZB(ctx: Context) {
     ...Markup.keyboard([
       ["🚖 Taksi chaqirish 🙋‍♀️", "🚚 Yetkazib berish 🙋🏻‍♀️"],
       ["👩‍🔧 Profil", "🏠 Doimiy manzillar"],
+      ['🚌 Mikro avtobuslar'],
     ])
       .resize()
       .oneTime(),
@@ -28,6 +29,7 @@ export async function onMainRUS(ctx: Context) {
     ...Markup.keyboard([
       ["🚖 Вызвать такси 🙋‍♀️", "🚚 Служба доставки 🙋🏻‍♀️"],
       ["👩‍🔧 Профиль", "🏠 Постоянные адреса"],
+      ['🚌 Микроавтобусы']
     ])
       .resize()
       .oneTime(),

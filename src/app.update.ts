@@ -110,6 +110,12 @@ export class AppUpdate {
     await this.userService.confirmInDriverAndSendHisToUser(ctx);
   }
 
+  @Action(/^(seethis=\d+)/)
+  async seeBusDricetion(@Ctx() ctx: Context) {
+    await this.userService.showBusDirection(ctx);
+  }
+
+
   @Action('forcallingtaxi')
   async forCallingTaxi(@Ctx() ctx: Context) {
     await this.userService.actionForCallingTaxi(ctx);
@@ -175,6 +181,11 @@ export class AppUpdate {
   @Hears(['Машина сломалась 😔', 'Mashina buzilib qoldi 😔'])
   async broken_car(@Ctx() ctx: Context) {
     return await this.userService.brokenCar(ctx);
+  }
+
+  @Hears(['🚌 Микроавтобусы', '🚌 Mikro avtobuslar'])
+  async hearsMicroBus(@Ctx() ctx: Context) {
+    await this.userService.hearsMicroBus(ctx);
   }
 
   @Action('cancelled')

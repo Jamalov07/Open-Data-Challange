@@ -2875,17 +2875,55 @@ export class UserService {
           where: { id: +id },
         });
         console.log(busDirection);
-        if (user.user_lang === "UZB") {
+        if (user.user_lang === 'UZB') {
           // console.log(__dirname+busDirection.photo);
-          const str = `🚍 Yo'nalish nomi: ${busDirection.full_direction_names}\n🕐 Qatnov vaqti: ${busDirection.work_time} gacha\n🚎 Mikroavtobuslar soni: ${busDirection.total_busses} ta\n🛣 Masofa: ${busDirection.direction_distance} km\n💷 Narxi: ${busDirection.price} so'm\n⏳ Borish vaqti: ${busDirection.finish_time} min`
-          await ctx.replyWithPhoto({ source:__dirname+busDirection.photo},{caption:str})
-        } else if (user.user_lang === "RUS") {
-          
+          const str = `🚍 Yo'nalish nomi: ${busDirection.full_direction_names}\n🕐 Qatnov vaqti: ${busDirection.work_time} gacha\n🚎 Mikroavtobuslar soni: ${busDirection.total_busses} ta\n🛣 Masofa: ${busDirection.direction_distance} km\n💷 Narxi: ${busDirection.price} so'm\n⏳ Borish vaqti: ${busDirection.finish_time} min`;
+          await ctx.replyWithPhoto(
+            { source: __dirname + busDirection.photo },
+            {
+              caption: str,
+              ...Markup.inlineKeyboard([
+                [
+                  Markup.button.callback(
+                    `${busDirection.full_direction_names.split('-')[0]}`,
+                    `show_location-${busDirection.from_coord}`,
+                  ),
+                ],
+                [
+                  Markup.button.callback(
+                    `${busDirection.full_direction_names.split('-')[1]}`,
+                    `show_location-${busDirection.to_coord}`,
+                  ),
+                ],
+              ]),
+            },
+          );
+        } else if (user.user_lang === 'RUS') {
+          const str = `🚍 Название направления: ${busDirection.full_direction_names}\n🕐 Время в пути: до ${busDirection.work_time}\n🚎 Количество маршруток: до ${busDirection.total_busses}\n🛣 Расстояние: ${busDirection.direction_distance} км\n💷 Цена: ${busDirection.price} сом\n⏳ Время в пути: ${busDirection.finish_time} мин`;
+          await ctx.replyWithPhoto(
+            { source: __dirname + busDirection.photo },
+            {
+              caption: str,
+              ...Markup.inlineKeyboard([
+                [
+                  Markup.button.callback(
+                    `${busDirection.full_direction_names.split('-')[0]}`,
+                    `show_location-${busDirection.from_coord}`,
+                  ),
+                ],
+                [
+                  Markup.button.callback(
+                    `${busDirection.full_direction_names.split('-')[1]}`,
+                    `show_location-${busDirection.to_coord}`,
+                  ),
+                ],
+              ]),
+            },
+          );
         }
       }
     } else {
       await ctx.reply('/start');
     }
   }
-
 }

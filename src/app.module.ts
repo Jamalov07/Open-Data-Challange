@@ -16,10 +16,11 @@ import { UserService } from './user.service';
 
 @Module({
   imports: [
-    TelegrafModule.forRoot({
-      token: '5915186714:AAEWaSZ_ny-mLUrA8DJ__BXRsqnc-ccwn8c',
-    }),
     ConfigModule.forRoot({ isGlobal: true, envFilePath: `.env` }),
+
+    TelegrafModule.forRoot({
+      token: process.env.BOT_TOKEN,
+    }),
     SequelizeModule.forFeature([
       User,
       Address,

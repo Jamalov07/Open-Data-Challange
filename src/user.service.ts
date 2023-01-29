@@ -2874,12 +2874,12 @@ export class UserService {
         const busDirection = await this.microbusRepo.findOne({
           where: { id: +id },
         });
-        console.log(busDirection);
+        // console.log(busDirection);
         if (user.user_lang === 'UZB') {
           // console.log(__dirname+busDirection.photo);
           const str = `🚍 Yo'nalish nomi: ${busDirection.full_direction_names}\n🕐 Qatnov vaqti: ${busDirection.work_time} gacha\n🚎 Mikroavtobuslar soni: ${busDirection.total_busses} ta\n🛣 Masofa: ${busDirection.direction_distance} km\n💷 Narxi: ${busDirection.price} so'm\n⏳ Borish vaqti: ${busDirection.finish_time} min`;
           await ctx.replyWithPhoto(
-            { source: __dirname + busDirection.photo },
+            { source: __dirname + '/..' + busDirection.photo },
             {
               caption: str,
               ...Markup.inlineKeyboard([
@@ -2901,7 +2901,7 @@ export class UserService {
         } else if (user.user_lang === 'RUS') {
           const str = `🚍 Название направления: ${busDirection.full_direction_names}\n🕐 Время в пути: до ${busDirection.work_time}\n🚎 Количество маршруток: до ${busDirection.total_busses}\n🛣 Расстояние: ${busDirection.direction_distance} км\n💷 Цена: ${busDirection.price} сом\n⏳ Время в пути: ${busDirection.finish_time} мин`;
           await ctx.replyWithPhoto(
-            { source: __dirname + busDirection.photo },
+            { source: __dirname + '/..' + busDirection.photo },
             {
               caption: str,
               ...Markup.inlineKeyboard([
